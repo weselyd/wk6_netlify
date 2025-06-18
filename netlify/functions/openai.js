@@ -75,7 +75,7 @@ exports.handler = async (event, context) => {
         "Access-Control-Allow-Headers": "Authorization, Content-Type",
       },
       body: JSON.stringify({
-        message: callOpenAI(prompt),
+        message: callOpenAI(prompt).output?.[0]?.content?.[0]?.text?.trim() || 'No response from OpenAI',
         userId: decodedToken.uid,
 
       }),
