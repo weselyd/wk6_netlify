@@ -3,7 +3,7 @@ exports.handler = async event => {
     return {
         statusCode: 200,
             headers: {
-                "Access-Control-Allow-Origin": "https://weselyd.github.io/", // Or specify your domain instead of '*'
+                "Access-Control-Allow-Origin": "https://weselyd.github.io", // Or specify your domain instead of '*'
                 "Access-Control-Allow-Headers": "Content-Type, Authorization",
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             },
