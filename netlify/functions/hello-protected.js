@@ -48,8 +48,8 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
+        'Access-Control-Allow-Origin': 'https://weselyd.github.io/',
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         'Access-Control-Allow-Headers': 'Authorization, Content-Type',
       },
       body: JSON.stringify({
