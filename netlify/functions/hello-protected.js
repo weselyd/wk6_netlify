@@ -30,7 +30,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*', // or your specific origin
+        'Access-Control-Allow-Origin': 'https://weselyd.github.io', // or your specific origin
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
