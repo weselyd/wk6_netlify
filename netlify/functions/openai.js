@@ -10,6 +10,27 @@ admin.initializeApp({
   }),
 });
 
+// Call OpenAI API to get AI response based on a prompt
+
+const prompt = "In a single sentence, explain a web browser's CORS policy.";
+
+async function callOpenAI(prompt) {
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, // Ensure you set this environment variable
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      input: `${prompt}`,
+    }),
+  });
+  if (!response.ok) throw new Error('OpenAI API error');
+  const data = await response.json();
+  return data;
+}
+
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -17,13 +38,13 @@ exports.handler = async (event, context) => {
       headers: {
         'Access-Control-Allow-Origin': 'https://weselyd.github.io', // or your specific origin
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       },
       body: '',
     };
   }
 
-  if (event.httpMethod !== 'GET') {
+  if (event.httpMethod !== 'GET' && event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers: {
@@ -44,6 +65,7 @@ exports.handler = async (event, context) => {
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
+    
     return {
       statusCode: 200,
       headers: {
@@ -53,8 +75,9 @@ exports.handler = async (event, context) => {
         "Access-Control-Allow-Headers": "Authorization, Content-Type",
       },
       body: JSON.stringify({
-        message: 'Hello, World!',
+        message: callOpenAI(prompt),
         userId: decodedToken.uid,
+
       }),
     };
   } catch (error) {
