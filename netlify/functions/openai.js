@@ -31,6 +31,9 @@ async function callOpenAI(prompt) {
   return data;
 }
 
+
+
+
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -65,7 +68,15 @@ exports.handler = async (event, context) => {
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    
+    let aiResponseToUser = "No advice received.";
+    try {
+      const aiReponse = await callOpenAI(prompt);  // Call OpenAI API with the prompt
+      aiResponseToUser = aiReponse.output?.[0]?.content?.[0]?.text?.trim() || "No advice received.";
+    } catch (error) {  // Handle any errors from the OpenAI API call, log to console, and display a user-friendly message
+      console.error('Error fetching AI advice:', error);
+      // Optionally set aiResponseToUser to a user-friendly error message
+      aiResponseToUser = "Could not get advice from OpenAI";
+    }
     return {
       statusCode: 200,
       headers: {
@@ -75,7 +86,7 @@ exports.handler = async (event, context) => {
         "Access-Control-Allow-Headers": "Authorization, Content-Type",
       },
       body: JSON.stringify({
-        message: callOpenAI(prompt).output?.[0]?.content?.[0]?.text?.trim() || 'No response from OpenAI',
+        message: aiResponseToUser || 'No response from OpenAI',
         userId: decodedToken.uid,
 
       }),
