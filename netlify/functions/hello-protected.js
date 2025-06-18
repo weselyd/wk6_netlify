@@ -26,7 +26,7 @@ admin.initializeApp({
 });
 
 exports.handler = async (event, context) => {
-  if (event.httpMethod !== 'GET') {
+  if (event.httpMethod !== 'GET' && event.httpMethod !== 'OPTIONS') {
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method Not Allowed' }),
