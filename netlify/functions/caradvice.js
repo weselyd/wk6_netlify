@@ -12,8 +12,6 @@ admin.initializeApp({
 
 // Call OpenAI API to get AI response based on a prompt
 
-//const prompt = "In a single sentence, explain a web browser's CORS policy.";
-
 async function callOpenAI(prompt) {
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
@@ -36,7 +34,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*', // or https://weselyd.github.io
+        'Access-Control-Allow-Origin': 'https://weselyd.github.io', // or https://weselyd.github.io
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
       },
