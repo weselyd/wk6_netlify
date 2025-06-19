@@ -12,7 +12,7 @@ admin.initializeApp({
 
 // Call OpenAI API to get AI response based on a prompt
 
-const prompt = "In a single sentence, explain a web browser's CORS policy.";
+// const prompt = "In a single sentence, explain a web browser's CORS policy.";
 
 async function callOpenAI(prompt) {
   const response = await fetch('https://api.openai.com/v1/responses', {
@@ -70,6 +70,7 @@ exports.handler = async (event, context) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     let aiResponseToUser = "No advice received.";
     try {
+      prompt = prompt.replace(/[\/\\'"`]/g, '');  // Remove /, \, ", ', and ` from trimmedCarQuery to help prevent injection attacks
       const aiReponse = await callOpenAI(prompt);  // Call OpenAI API with the prompt
       aiResponseToUser = aiReponse.output?.[0]?.content?.[0]?.text?.trim() || "No advice received.";
     } catch (error) {  // Handle any errors from the OpenAI API call, log to console, and display a user-friendly message
