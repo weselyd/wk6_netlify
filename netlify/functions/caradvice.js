@@ -1,7 +1,6 @@
-// netlify/functions/hello.js
+// Initialize Firebase Admin (use environment variables for security)
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin (use environment variables for security)
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -11,7 +10,6 @@ admin.initializeApp({
 });
 
 // Call OpenAI API to get AI response based on a prompt
-
 async function callOpenAI(prompt) {
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
@@ -21,7 +19,7 @@ async function callOpenAI(prompt) {
     },
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
-      input: `${prompt}`,
+      input: `${prompt}`,  // Use the prompt from the user request
     }),
   });
   if (!response.ok) throw new Error('OpenAI API error');
@@ -30,11 +28,11 @@ async function callOpenAI(prompt) {
 }
 
 exports.handler = async (event, context) => {
-  if (event.httpMethod === 'OPTIONS') {
+  if (event.httpMethod === 'OPTIONS') {  // Handle preflight requests for CORS
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': 'https://weselyd.github.io', // or https://weselyd.github.io
+        'Access-Control-Allow-Origin': 'https://weselyd.github.io',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
       },
@@ -42,31 +40,30 @@ exports.handler = async (event, context) => {
     };
   }
 
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod !== 'POST') {  // Handle only POST requests
     return {
       statusCode: 405,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://weselyd.github.io',
       },
       body: JSON.stringify({ error: 'Method Not Allowed' }),
     };
   }
 
-  // Verify Firebase ID token
-  const idToken = event.headers.authorization?.split('Bearer ')[1];
+  // Process user's POST request
+  const idToken = event.headers.authorization?.split('Bearer ')[1];  // Extract the token from the Authorization header
   if (!idToken) {
     return {
       statusCode: 401,
       body: JSON.stringify({ error: 'No token provided' }),
     };
   }
-
-  try {
+  try { // Verify the ID token using Firebase Admin SDK
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     let aiResponseToUser = "No advice received.";
 
     let userQuery = '';
-    try {
+    try {  // Parse the request body to get the user's input
       const body = JSON.parse(event.body);
       userQuery = String(body.input) || '';
     } catch (err) {
@@ -75,7 +72,7 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ error: 'Invalid JSON' }),
       };
     }
-    try {
+    try {  // Call OpenAI API with the user's query
       const aiReponse = await callOpenAI(userQuery);  // Call OpenAI API with the prompt
       aiResponseToUser = aiReponse.output?.[0]?.content?.[0]?.text?.trim() || "No advice received.";
     } catch (error) {  // Handle any errors from the OpenAI API call, log to console, and display a user-friendly message
@@ -83,7 +80,7 @@ exports.handler = async (event, context) => {
       // Optionally set aiResponseToUser to a user-friendly error message
       aiResponseToUser = "Could not get advice from OpenAI";
     }
-    return {
+    return {  // Return the AI response to the user
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
@@ -94,7 +91,6 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         message: aiResponseToUser || 'No response from OpenAI',
         userId: decodedToken.uid,
-
       }),
     };
   } catch (error) {
